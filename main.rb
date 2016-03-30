@@ -1,14 +1,36 @@
 require 'redditkit'
 require 'pry'
 
-Header_regex = "^(\d+)?[dD](\d+)(.*)"
-Line_regex = "^(\d+)(\s*-+\s*\d+)?(.*)"
+Header_regex = /^(\d+)?[dD](\d+)(.*)/
+Line_regex = /^(\d+)(\s*-+\s*\d+)?(.*)/
 
 class Tables
   def initialize(text)
     @text = text
     @tables = []
     parse
+  end
+
+  def parse
+    indicies = []
+    lines = @text.split("\n")
+    lines.reject! {|l| l.nil? || l.strip.empty?}
+    lines.map.with_index { |line, i|
+      line = line.gsub(/[[:punct:]]/, '')
+      line_match = Header_regex.match(line.strip)
+      if line_match then
+        indicies << i
+      end
+    }
+    return 0 unless indicies.length != 0
+
+    table_text = []
+    (0..indicies.length-1).each { |i|
+      table_text << "#{lines[indicies[i]..indicies[i+1]]}\n"
+      binding.pry
+    }
+    table_text << "#{lines[indicies[-1]..indicies.length]}\n"
+    binding.pry
   end
 end
 
@@ -26,14 +48,15 @@ class Table
     lines = @text.split("\n")
     head = lines.shift
     head = head.gsub(/[[:punct:]]/, '')
-    head_match = /#{Header_regex}/.match(head.strip)
+    head = head.gsub(/[[:space:]]|\t/, '')
+    head_match = Header_regex.match(head.strip)
     if head_match then
       @die = head_match[2].to_i
       @header = head_match[3]
     end
     lines.each { |l|
       l = l.gsub(/[[:punct:]]/, '')
-      ti = /#{Line_regex}/.match(l.strip)
+      ti = Line_regex.match(l.strip)
       if ti then
         @outcomes << TableItem.new(ti.to_s)
       end
@@ -51,7 +74,7 @@ class TableItem
   end
 
   def parse
-    main_regex = /#{Line_regex}/.match(@text)
+    main_regex = Line_regex.match(@text)
     binding.pry
     if not main_regex then
       return
@@ -68,13 +91,15 @@ class TableItem
     #   @weight = 1
     end
     #if /[dD]\d+/.match(@outcome)
-    
+
   end
 end
 
 
+
+
 File.open('barbarians', 'r') { |f|
   a = f.read()
-  tb = Table.new(a)
+  tb = Tables.new(a)
   binding.pry
 }
