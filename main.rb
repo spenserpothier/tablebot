@@ -19,18 +19,20 @@ class Tables
       line = line.gsub(/[[:punct:]]/, '')
       line_match = Header_regex.match(line.strip)
       if line_match then
-        indicies << i
+        indicies.push(i)
       end
     }
     return 0 unless indicies.length != 0
 
     table_text = []
-    (0..indicies.length-1).each { |i|
-      table_text << "#{lines[indicies[i]..indicies[i+1]]}\n"
-      binding.pry
+    ((0...(indicies.length-1)).to_a).each { |i|
+      t = lines[indicies[i]..(indicies[i+1]-1)]
+      table_text.push("#{t}\n")
     }
-    table_text << "#{lines[indicies[-1]..indicies.length]}\n"
-    binding.pry
+    
+    table_text.each { |t|
+      @tables << Table.new(t)
+    }
   end
 end
 
@@ -94,9 +96,6 @@ class TableItem
 
   end
 end
-
-
-
 
 File.open('barbarians', 'r') { |f|
   a = f.read()
