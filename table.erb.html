@@ -1,0 +1,14 @@
+<html>
+<head>
+<title>Output</title>
+<body>
+<table border=1>
+  <% for @table in tb.tables %>
+  <th colspan=2><%= @table.header %></th>
+    <% for @outcome in @table.outcomes %>
+      <tr><td><%= @outcome.weight %></td><td><%= @outcome.outcome %></td></tr>
+    <% end %>
+  <% end %>
+</table>
+</body>
+</html>

@@ -1,10 +1,12 @@
 require 'redditkit'
 require 'pry'
+require 'erb'
 
 Header_regex = /^(\d+)?[dD](\d+)(.*)/
 Line_regex = /^(\d+)(\s*-+\s*\d+)?(.*)/
 
 class Tables
+  attr_reader :tables
   def initialize(text)
     @text = text
     @tables = []
@@ -27,9 +29,9 @@ class Tables
     table_text = []
     ((0...(indicies.length-1)).to_a).each { |i|
       t = lines[indicies[i]..(indicies[i+1]-1)]
-      table_text.push("#{t}\n")
+      table_text.push(t.join("\n"))
     }
-    
+
     table_text.each { |t|
       @tables << Table.new(t)
     }
@@ -37,6 +39,7 @@ class Tables
 end
 
 class Table
+  attr_reader :die, :header, :outcomes
   def initialize(text)
     @text = text
     @die = nil
@@ -50,11 +53,11 @@ class Table
     lines = @text.split("\n")
     head = lines.shift
     head = head.gsub(/[[:punct:]]/, '')
-    head = head.gsub(/[[:space:]]|\t/, '')
+    #head = head.gsub(/[[:space:]]|\t/, '')
     head_match = Header_regex.match(head.strip)
     if head_match then
       @die = head_match[2].to_i
-      @header = head_match[3]
+      @header = head_match[3].strip
     end
     lines.each { |l|
       l = l.gsub(/[[:punct:]]/, '')
@@ -67,6 +70,7 @@ class Table
 end
 
 class TableItem
+  attr_reader :outcome, :weight
   def initialize(text)
     @text = text
     @inline_table = nil
@@ -77,28 +81,27 @@ class TableItem
 
   def parse
     main_regex = Line_regex.match(@text)
-    binding.pry
     if not main_regex then
       return
     end
-   @outcome = main_regex[3]
-
-    if not main_regex[2] then
-      @weight = 1
+    @outcome = main_regex[3].strip
+    @weight = main_regex[1].to_i
     # else
     #   start = main_regex[1].to_i
     #   stop = main_regex[2].to_i
     #   @weight = stop - start + 1
     # rescue
     #   @weight = 1
-    end
     #if /[dD]\d+/.match(@outcome)
 
   end
 end
 
+
 File.open('barbarians', 'r') { |f|
   a = f.read()
   tb = Tables.new(a)
-  binding.pry
+  renderer = ERB.new(File.read('./table.erb.html'))
+  output = renderer.result(binding)
+  File.write('./output.html', output)
 }
