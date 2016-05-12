@@ -1,7 +1,7 @@
 require 'redditkit'
 require 'pry'
 require 'erb'
-require_relative './lib/tablebot/tables.rb'
+require_relative './lib/tablebot.rb'
 
 
 Header_regex = /^(\d+)?[dD](\d+)(.*)/
