@@ -1,8 +1,8 @@
 require "bundler/gem_tasks"
+require 'rspec/core/rake_task'
 
-task :do_something do
-  puts "Success"
+RSpec::Core::RakeTask.new(:spec) do |t|
+  t.rspec_opts = '--format documentation'
 end
-
-task :default => :do_something
+task :default => :spec
 

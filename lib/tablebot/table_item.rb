@@ -1,3 +1,5 @@
+require_relative 'tables'
+
 class TableItem
   attr_reader :outcome, :weight
   def initialize(text)
@@ -9,7 +11,7 @@ class TableItem
   end
 
   def parse
-    main_regex = Line_regex.match(@text)
+    main_regex = Tables::Line_regex.match(@text)
     if not main_regex then
       return
     end
